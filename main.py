@@ -15,8 +15,8 @@ br.open('https://github.com/login')
 
 br.form=list(br.forms())[0]
 
-_username = str(raw_input("Enter Username: "))
-_password = str(raw_input("Enter password: "))
+_username = str(raw_input("Username for 'https://github.com': "))
+_password = str(raw_input("Password for 'https://" + _username + "@github.com': "))
 
 email_control = br.form.find_control("login")
 if email_control.type == "text":
