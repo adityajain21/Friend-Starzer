@@ -36,28 +36,29 @@ else:
 
 _friendusername = str(raw_input("Username of friend for which you want to star all the repos: "))
 
-url = "https://api.github.com/users/" + _friendusername + "/repos"
+url = "https://api.github.com/users/" + _friendusername + "/repos?per_page=200"
 response = requests.get(url)
 data = json.loads(response.text)
 
+
+print "\nThe following repos are being starred: "
 for i in data:
 	repo = i['name']
 	url = "https://api.github.com/user/starred/" + _friendusername + "/" + repo
 	if not i['fork']:
-		print "The following repos are being starred: "
 		print repo
 		requests.put(url,auth=(_username,_password))
-	
 
-_reverse=str(raw_input("Do you want a reverse mechanism? (Y/N)  "))
+_reverse=str(raw_input("\n\nDo you want a reverse mechanism? (Y/N) "))
 
 if(_reverse == 'Y'):
+	print "\nThe following repos are being un-starred: "
 	for i in data:
 		repo = i['name']
 		url = "https://api.github.com/user/starred/" + _friendusername + "/" + repo
 		if not i['fork']:
-			print "The following repos are being un-starred: "
 			print repo
 			requests.delete(url,auth=(_username,_password))
 
-print "That was a great thing you did for your friend!"
+print "\n\nThat was a great thing you did for your friend!"
+	
