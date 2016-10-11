@@ -43,6 +43,6 @@ data = json.loads(response.text)
 for i in data:
 	repo = i['name']
 	url = "https://api.github.com/user/starred/" + _friendusername + "/" + repo
-	requests.delete(url,auth=(_username,_password))
+	requests.put(url,auth=(_username,_password))
 
 print "DONE!"
