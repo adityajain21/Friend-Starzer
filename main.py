@@ -43,6 +43,21 @@ data = json.loads(response.text)
 for i in data:
 	repo = i['name']
 	url = "https://api.github.com/user/starred/" + _friendusername + "/" + repo
-	requests.put(url,auth=(_username,_password))
+	if not i['fork']:
+		print "The following repos are being starred: "
+		print repo
+		requests.put(url,auth=(_username,_password))
+	
 
-print "DONE!"
+_reverse=str(raw_input("Do you want a reverse mechanism? (Y/N)  "))
+
+if(_reverse == 'Y'):
+	for i in data:
+		repo = i['name']
+		url = "https://api.github.com/user/starred/" + _friendusername + "/" + repo
+		if not i['fork']:
+			print "The following repos are being un-starred: "
+			print repo
+			requests.delete(url,auth=(_username,_password))
+
+print "That was a great thing you did for your friend!"
