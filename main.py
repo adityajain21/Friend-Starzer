@@ -1,40 +1,25 @@
-import os
 import requests
 import json
 import getpass
-from mechanize import Browser
+
+
+GITHUB_API_URL = "https://api.github.com/"
 
 
 def check_credentials(username, password):
-	br = Browser()
+	try:
+		response = requests.head(GITHUB_API_URL, auth=(username, password))
+	except requests.exceptions.ConnectionError, e:
+		print "Please check your internet connection!"
+		exit()
 
-	br.set_handle_robots(False)
-	br.set_handle_refresh(False)
+	return response.ok
 
-	br.open('https://github.com/login')
-
-	br.form = list(br.forms())[0]
-	
-	email_control = br.form.find_control("login")
-	if email_control.type == "text":
-		email_control.value = username
-
-	password_control = br.form.find_control("password")
-	if password_control.type == "password":
-		password_control.value = password
-
-	for control in br.form.controls:
-		submit = control
-
-	submit.readonly = False
-
-	flag = br.submit().read().find('Sign in to GitHub')
-	return flag == -1
 
 def star_repo(username, password, friendusername, repo_list, mode):
 	for repo in repo_list:
 		repo_name = repo['name']
-		url = "https://api.github.com/user/starred/" + friendusername + "/" + repo_name
+		url = GITHUB_API_URL + "user/starred/" + friendusername + "/" + repo_name
 
 		if not repo['fork']:
 			print repo_name
@@ -55,7 +40,7 @@ def main():
 		print "Logged in Succesfully."
 		_friendusername = str(raw_input("Username of friend for which you want to star all the repos: "))
 		
-		url = "https://api.github.com/users/" + _friendusername + "/repos?per_page=100"
+		url = GITHUB_API_URL + "users/" + _friendusername + "/repos?per_page=100"
 		response = requests.get(url)
 		data = json.loads(response.text)
 		
