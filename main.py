@@ -1,64 +1,59 @@
-import os, requests, json, getpass
-from mechanize import Browser
-
-br = Browser()
-
-br.set_handle_robots(False)
-br.set_handle_refresh(False)
-
-br.open('https://github.com/login')
-
-br.form=list(br.forms())[0]
-
-_username = str(raw_input("Username for 'https://github.com': "))
-_password = str(getpass.getpass("Password for 'https://" + _username + "@github.com': "))
+import requests
+import json
+import getpass
 
 
-email_control = br.form.find_control("login")
-if email_control.type == "text":
-	email_control.value = _username
-
-password_control = br.form.find_control("password")
-if password_control.type == "password":
-	password_control.value = _password
-
-for control in br.form.controls:
-    submit = control
-
-submit.readonly = False
-
-if(br.submit().read().find('Sign in to GitHub')==-1):
-	print("Logged in Succesfully.")
-else:
-	print ("Invalid Credentials. Please try again.")
-	exit()
+GITHUB_API_URL = "https://api.github.com/"
 
 
-_friendusername = str(raw_input("Username of friend for which you want to star all the repos: "))
+def check_credentials(username, password):
+	try:
+		response = requests.head(GITHUB_API_URL, auth=(username, password))
+	except requests.exceptions.ConnectionError, e:
+		print "Please check your internet connection!"
+		exit()
 
-url = "https://api.github.com/users/" + _friendusername + "/repos?per_page=200"
-response = requests.get(url)
-data = json.loads(response.text)
+	return response.ok
 
 
-print "\nThe following repos are being starred: "
-for i in data:
-	repo = i['name']
-	url = "https://api.github.com/user/starred/" + _friendusername + "/" + repo
-	if not i['fork']:
-		print repo
-		requests.put(url,auth=(_username,_password))
+def star_repo(username, password, friendusername, repo_list, mode):
+	for repo in repo_list:
+		repo_name = repo['name']
+		url = GITHUB_API_URL + "user/starred/" + friendusername + "/" + repo_name
 
-_reverse=str(raw_input("\n\nDo you want a reverse mechanism? (Y/N) "))
+		if not repo['fork']:
+			print repo_name
+			if mode:
+				requests.put(url,auth=(username, password))
+			else:
+				requests.delete(url,auth=(username, password))
 
-if(_reverse == 'Y'):
-	print "\nThe following repos are being un-starred: "
-	for i in data:
-		repo = i['name']
-		url = "https://api.github.com/user/starred/" + _friendusername + "/" + repo
-		if not i['fork']:
-			print repo
-			requests.delete(url,auth=(_username,_password))
 
-print "\n\nThat was a great thing you did for your friend!"
-	
+def main():
+	_username = str(raw_input("Username for 'https://github.com': "))
+	_password = str(getpass.getpass("Password for 'https://" + _username + "@github.com': "))
+
+	if not check_credentials(_username, _password):
+		print "Invalid Credentials. Please try again."
+		return
+	else:
+		print "Logged in Succesfully."
+		_friendusername = str(raw_input("Username of friend for which you want to star all the repos: "))
+		
+		url = GITHUB_API_URL + "users/" + _friendusername + "/repos?per_page=100"
+		response = requests.get(url)
+		data = json.loads(response.text)
+		
+		print "\nThe following repos are being starred: "
+		star_repo(_username, _password, _friendusername, data, True)
+
+		_reverse = str(raw_input("\n\nDo you want a reverse mechanism? (Y/N) "))
+		if(_reverse == 'Y'):
+			print "\nThe following repos are being un-starred: "
+			star_repo(_username, _password, _friendusername, data, False)
+
+		print "\n\nThat was a great thing you did for your friend!"
+		
+
+if __name__ == "__main__":
+	main()

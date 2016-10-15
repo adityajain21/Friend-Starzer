@@ -11,11 +11,9 @@ Added a reverse mechanism for un-starring all the repos.
 
 ####Installation:
 	git clone https://github.com/adityajain21/Friend-Starzer.git && cd Friend-Starzer/
-	pip install -r requirments.txt
 	python main.py
 
 
-- Requires 'Mechanize'.
 - Should work on Python 2 and Python 3.
 
 
