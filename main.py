@@ -48,7 +48,8 @@ def main():
 		star_repo(_username, _password, _friendusername, data, True)
 
 		_reverse = str(raw_input("\n\nDo you want a reverse mechanism? (Y/N) "))
-		if(_reverse == 'Y'):
+		_reverse = _reverse.lower()
+		if(_reverse == 'y' or _reverse == 'yes'):
 			print "\nThe following repos are being un-starred: "
 			star_repo(_username, _password, _friendusername, data, False)
 
